@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: stix-backend
+    env: docker
+    repo: https://github.com/vamshichethan/STIX_ML.git
+    rootDir: backend
+    plan: free # or paid depending on needs
+    envVars:
+      - key: MONGO_URI
+        sync: false # User will provide this in dashboard
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USER
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: PORT
+        value: 8000 # Render handles this automatically, but good to have
