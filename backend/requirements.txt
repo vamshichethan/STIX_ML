@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+python-multipart
+pymongo
+neo4j
+xgboost
+scikit-learn
+torch
+torch-geometric
+pgmpy
+pydantic
+stix2
+lxml
+networkx
+pandas
+numpy
