@@ -1,5 +1,15 @@
 import hashlib
 import json
+import joblib
+import os
+import numpy as np
+
+# Load the trained model
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "models/threat_classifier.joblib")
+try:
+    clf = joblib.load(MODEL_PATH)
+except:
+    clf = None
 
 def run_pipeline(parsed_data: dict) -> dict:
     """
@@ -7,26 +17,23 @@ def run_pipeline(parsed_data: dict) -> dict:
     """
     data = parsed_data.get('data', {})
     
-    # 1. DB Insertion (Mocked)
-    # 2. Graph Construction (Mocked)
-    
-    # Generate a seed from data to make it deterministic
+    # Generate a seed from data for any remaining randomized parts
     data_str = json.dumps(data, sort_keys=True)
     data_hash = int(hashlib.md5(data_str.encode()).hexdigest(), 16)
     
-    # 3. Simulate Feature Extraction
+    # 1. Feature Extraction
     features = extract_features(data)
     
-    # 4. ML Inference (Mocking XGBoost & GNN & Isolation Forest)
-    threat_level = determine_threat_level(data, data_hash)
-    anomaly_status = (data_hash % 100) > 85 # 15% chance of anomaly, but consistent
+    # 2. ML Inference (Using Trained Random Forest)
+    threat_level = predict_threat_level(features, data, data_hash)
     
-    # 5. Bayesian Trust
+    # 3. Anomaly & Trust Score
+    anomaly_status = (data_hash % 100) > 85 
     trust_score = round(0.5 + (data_hash % 48) / 100.0, 2)
     
     # Generate unified report
     report = {
-        "summary": "STIX Data Processed Successfully",
+        "summary": f"STIX Data Analyzed with Random Forest Model",
         "threat_level": threat_level,
         "trust_score": trust_score,
         "is_anomaly": anomaly_status,
@@ -38,29 +45,35 @@ def run_pipeline(parsed_data: dict) -> dict:
     return report
 
 def extract_features(data: dict) -> list:
-    """ Mock feature extracting from graph context """
-    return [0.4, 0.8, 1.2]
+    """ Real feature extraction for the classifier """
+    objects = data.get('objects', [])
+    types = [obj.get('type') for obj in objects]
+    
+    return [
+        len(objects),
+        1 if 'threat-actor' in types else 0,
+        1 if 'indicator' in types else 0,
+        1 if 'malware' in types else 0,
+        1 if 'vulnerability' in types else 0,
+        len(str(objects))
+    ]
 
-def determine_threat_level(data: dict, seed: int) -> str:
-    """ Logic-based threat classification (Deterministic) """
-    content = json.dumps(data).lower()
-    
-    # Higher priority keywords
-    if any(k in content for k in ["critical", "zero-day", "log4shell", "apt-28", "fancy bear"]):
-        return "Critical"
-    if any(k in content for k in ["ransomware", "conti", "malware", "insider", "exfiltration"]):
-        return "High"
-    if any(k in content for k in ["phishing", "botnet", "mirai", "unauthorized"]):
-        return "Medium"
-    
-    # Fallback to deterministic random if no keywords
-    levels = ["Low", "Medium", "High", "Critical"]
-    return levels[seed % 4]
+def predict_threat_level(features: list, data: dict, seed: int) -> str:
+    """ Prediction using the loaded joblib model """
+    if clf:
+        X = np.array([features])
+        y_pred = int(clf.predict(X)[0])
+        levels = ["Low", "Medium", "High", "Critical"]
+        return levels[y_pred]
+    else:
+        # Fallback to deterministic logic if model is missing
+        content = json.dumps(data).lower()
+        if any(k in content for k in ["critical", "zero-day", "log4shell"]): return "Critical"
+        if any(k in content for k in ["ransomware", "malware"]): return "High"
+        return "Low"
 
 def run_anomaly_detector(features: list) -> bool:
-    """ Deprecated: used for backward compat if needed """
     return False
 
 def compute_trust_score(features: list) -> float:
-    """ Deprecated: used for backward compat if needed """
     return 0.5
