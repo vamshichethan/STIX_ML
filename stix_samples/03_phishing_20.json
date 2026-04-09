@@ -1,0 +1,16 @@
+{
+  "type": "bundle",
+  "id": "bundle--00000001-0000-0000-0000-000000000003",
+  "objects": [
+    {
+      "type": "indicator",
+      "id": "indicator--835d3d3a-1748-43f6-932f-5b12da615598",
+      "created": "2026-04-09T10:00:00.000Z",
+      "modified": "2026-04-09T10:00:00.000Z",
+      "name": "Malicious Attachment",
+      "pattern": "[file:name = 'invoice.exe']",
+      "pattern_type": "stix",
+      "valid_from": "2026-04-09T00:00:00Z"
+    }
+  ]
+}

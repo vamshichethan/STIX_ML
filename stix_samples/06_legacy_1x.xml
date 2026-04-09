@@ -1,0 +1,11 @@
+<stix:STIX_Package 
+    xmlns:stix="http://stix.mitre.org/stix-1"
+    xmlns:indicator="http://stix.mitre.org/Indicator-2"
+    id="example:Package-1" version="1.2">
+    <stix:Indicators>
+        <stix:Indicator id="example:Indicator-1" xsi:type="indicator:IndicatorType">
+            <indicator:Title>Malicious IP found</indicator:Title>
+            <indicator:Description>Legacy threat marker</indicator:Description>
+        </stix:Indicator>
+    </stix:Indicators>
+</stix:STIX_Package>

@@ -11,9 +11,11 @@ try:
 except:
     clf = None
 
+from app.services.intelligence_engine import IntelligenceEngine
+
 def run_pipeline(parsed_data: dict) -> dict:
     """
-    Orchestrates the data flow: DB Insertion -> Graph Extraction -> ML Inference -> Trust Score.
+    Orchestrates the data flow: DB Insertion -> Graph Extraction -> ML Inference -> Intelligence Analysis.
     """
     data = parsed_data.get('data', {})
     
@@ -25,36 +27,47 @@ def run_pipeline(parsed_data: dict) -> dict:
     features = extract_features(data)
     
     # 2. ML Inference (Using Trained Random Forest)
-    threat_level = predict_threat_level(features, data, data_hash)
+    ml_threat_level = predict_threat_level(features, data, data_hash)
     
-    # 3. Anomaly & Trust Score
-    anomaly_status = (data_hash % 100) > 85 
-    trust_score = round(0.5 + (data_hash % 48) / 100.0, 2)
+    # 3. Graph Intelligence Analysis (New Step)
+    intel_engine = IntelligenceEngine()
+    intel_report = intel_engine.analyze_stix_bundle(data)
+    decision = intel_report.get("decision_bundle", {})
+    
+    # 4. Anomaly & Trust Score (Augmented by Intelligence)
+    has_anomalies = len(decision.get("anomalies", [])) > 0
+    trust_score = round(decision.get("confidence", 0.5), 2)
     
     # Generate unified report
     report = {
-        "summary": f"STIX Data Analyzed with Random Forest Model",
-        "threat_level": threat_level,
+        "summary": "STIX Data Analyzed with Hybrid ML/Graph Intelligence",
+        "threat_level": decision.get("threat_level") or ml_threat_level,
+        "ml_inference": ml_threat_level,
+        "graph_intelligence": decision,
         "trust_score": trust_score,
-        "is_anomaly": anomaly_status,
-        "graph_nodes_extracted": len(data.get("objects", [])),
-        "relationships_extracted": len(data.get("objects", [])) * 2,
-        "raw_data_refs": data.get("id", "bundle--new")
+        "is_anomaly": has_anomalies,
+        "attack_chain": decision.get("attack_chain", []),
+        "recommended_action": decision.get("recommended_action", []),
+        "graph_nodes_extracted": len(intel_report.get("graph", {}).get("nodes", [])),
+        "relationships_extracted": len(intel_report.get("graph", {}).get("edges", [])),
+        "raw_data_refs": data.get("id", "bundle--new"),
+        "validation_details": parsed_data.get("validation", {}),
+        "stix_version": parsed_data.get("version", "Unknown")
     }
     
     return report
 
 def extract_features(data: dict) -> list:
-    """ Real feature extraction for the classifier """
+    """ Extract 6-dimensional feature vector for the Random Forest model """
     objects = data.get('objects', [])
     types = [obj.get('type') for obj in objects]
     
     return [
         len(objects),
-        1 if 'threat-actor' in types else 0,
+        1 if 'threat-actor' in types or 'campaign' in types else 0,
         1 if 'indicator' in types else 0,
         1 if 'malware' in types else 0,
-        1 if 'vulnerability' in types else 0,
+        1 if 'infrastructure' in types else 0,
         len(str(objects))
     ]
 

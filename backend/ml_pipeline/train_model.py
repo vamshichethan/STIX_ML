@@ -13,30 +13,26 @@ def extract_features(stix_bundle):
     
     features = {
         'num_objects': len(objects),
-        'has_threat_actor': 1 if 'threat-actor' in types else 0,
+        'has_threat_actor': 1 if 'threat-actor' in types or 'campaign' in types else 0,
         'has_indicator': 1 if 'indicator' in types else 0,
         'has_malware': 1 if 'malware' in types else 0,
-        'has_vulnerability': 1 if 'vulnerability' in types else 0,
-        'description_len': len(str(objects)) # Proxy for detail complexity
+        'has_infrastructure': 1 if 'infrastructure' in types else 0,
+        'description_len': len(str(objects))
     }
     return features
 
 def train():
-    print("Starting Model Training...")
+    print("Starting Advanced Model Training...")
     
-    # Define sample data files and their expected labels
+    # Define current refined sample data files and their expected labels
+    # 0: Low, 1: Medium, 2: High, 3: Critical
     samples_dir = os.path.join(os.path.dirname(__file__), "../../stix_samples")
     label_map = {
-        "01_critical_apt.json": 3,
-        "02_high_ransomware.json": 2,
-        "03_medhigh_phishing.json": 2,
-        "04_medium_botnet.json": 1,
-        "05_medium_leak.json": 1,
-        "06_low_vuln.json": 0,
-        "07_info_patch.json": 0,
-        "08_low_benign.json": 0,
-        "09_high_insider.json": 2,
-        "10_critical_zero_day.json": 3
+        "01_apt_adv_21.json": 3,
+        "02_ransomware_21.json": 2,
+        "03_phishing_20.json": 0,
+        "04_botnet_20.json": 2,
+        "05_malformed_recovery.json": 0
     }
     
     data = []
@@ -47,43 +43,53 @@ def train():
         path = os.path.join(samples_dir, filename)
         if os.path.exists(path):
             with open(path, 'r') as f:
-                bundle = json.load(f)
-                features = extract_features(bundle)
-                
-                # Create variations
-                for i in range(20): # Increased to 20 variations
-                    f_var = features.copy()
-                    f_var['num_objects'] += np.random.randint(-1, 2)
-                    f_var['description_len'] += np.random.randint(-100, 101)
-                    data.append(list(f_var.values()))
-                    labels.append(label)
+                try:
+                    bundle = json.load(f)
+                    features = extract_features(bundle)
+                    
+                    # Create variations for robust training
+                    for i in range(50): 
+                        f_var = features.copy()
+                        f_var['num_objects'] += np.random.randint(-1, 2)
+                        f_var['description_len'] += np.random.randint(-100, 101)
+                        data.append(list(f_var.values()))
+                        labels.append(label)
+                except:
+                    continue
 
-    # 2. Add SYNTHETIC NEUTRAL DATA (Crucial!)
-    # This teaches the model that "one random object with no flags" = LOW
-    for i in range(50):
-        low_feature = [
+    # 2. Add SYNTHETIC NOISE / BENIGN DATA
+    for i in range(100):
+        noise = [
             np.random.randint(1, 3), # num_objects
             0, # has_threat_actor
             0, # has_indicator
             0, # has_malware
-            0, # has_vulnerability
-            np.random.randint(10, 500) # description_len
+            0, # has_infrastructure
+            np.random.randint(50, 400) # description_len
         ]
-        data.append(low_feature)
-        labels.append(0) # Always LOW
+        data.append(noise)
+        labels.append(0)
 
     X = np.array(data)
     y = np.array(labels)
     
-    # 2. Train Random Forest
+    # 3. Train Random Forest
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    
+    # Using more estimators for better generalization
+    clf = RandomForestClassifier(n_estimators=150, max_depth=10, random_state=42)
     clf.fit(X_train, y_train)
     
-    # 3. Save Model
-    os.makedirs("models", exist_ok=True)
-    joblib.dump(clf, "models/threat_classifier.joblib")
-    print(f"Model trained and saved to models/threat_classifier.joblib with accuracy: {clf.score(X_test, y_test):.2f}")
+    # 4. Save Model
+    models_dir = os.path.join(os.path.dirname(__file__), "models")
+    os.makedirs(models_dir, exist_ok=True)
+    model_save_path = os.path.join(models_dir, "threat_classifier.joblib")
+    joblib.dump(clf, model_save_path)
+    
+    print("=" * 60)
+    print(f"Model successfully trained and saved to: {model_save_path}")
+    print(f"Final Validation Accuracy: {clf.score(X_test, y_test):.2%}")
+    print("=" * 60)
 
 if __name__ == "__main__":
     train()

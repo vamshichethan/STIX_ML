@@ -1,0 +1,14 @@
+{
+  "type": "bundle",
+  "id": "bundle--5",
+  "objects": [
+    {
+      "type": "threat-actor",
+      "id": "dfc58614-728b-4b11-9a74-9f27917e7506",
+      "Created": "2026-04-09 10:00:00",
+      "modified": "2026-04-09T10:00:00.000Z",
+      "name": "Anonymous",
+      "description": "Malformed record for recovery testing."
+    }
+  ]
+}

@@ -165,10 +165,68 @@ function App() {
             </div>
             
              <div className="glass-panel">
-              <div className="stat-label">Raw Parsing Summary</div>
+              <div className="stat-label">Cyber Intelligence Insights</div>
               <div style={{ marginTop: '16px' }}>
-                <p><strong>Status:</strong> {report.summary}</p>
-                <p><strong>Bundle Ref:</strong> {report.raw_data_refs}</p>
+                {report.attack_chain && report.attack_chain.length > 0 ? (
+                  <div style={{ marginBottom: '16px' }}>
+                    <p><strong>Attack Chains:</strong></p>
+                    {report.attack_chain.map((chain, i) => (
+                      <div key={i} style={{ color: 'var(--accent-cyan)', fontSize: '0.9rem', padding: '4px 8px', background: 'rgba(0,183,255,0.1)', borderRadius: '4px', marginTop: '4px' }}>
+                        {chain}
+                      </div>
+                    ))}
+                  </div>
+                ) : <p style={{ color: 'var(--text-secondary)' }}>No known attack chains detected.</p>}
+                
+                {report.recommended_action && report.recommended_action.length > 0 && (
+                   <div style={{ marginTop: '16px' }}>
+                    <p><strong>Recommended Actions:</strong></p>
+                    <ul style={{ paddingLeft: '20px', fontSize: '0.9rem', marginTop: '8px' }}>
+                      {report.recommended_action.map((action, i) => (
+                        <li key={i} style={{ marginBottom: '4px' }}>{action}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="glass-panel">
+              <div className="stat-label">Structural Quality & Integrity</div>
+              <div style={{ marginTop: '16px', fontSize: '0.9rem' }}>
+                 <p><strong>STIX Version:</strong> <span style={{ color: 'var(--accent-cyan)' }}>{report.stix_version}</span></p>
+                 <p><strong>Integrity Score:</strong> <span style={{ color: getThreatColor(report.validation_details?.score > 80 ? 'low' : 'high') }}>{report.validation_details?.score}/100</span></p>
+                 
+                 {report.validation_details?.missing_fields?.length > 0 && (
+                   <div style={{ marginTop: '12px' }}>
+                     <p style={{ color: 'var(--warning-orange)' }}><strong>Missing Required Fields:</strong></p>
+                     <p style={{ fontSize: '0.85rem', background: 'rgba(255,165,0,0.1)', padding: '4px 8px', borderRadius: '4px' }}>
+                        {report.validation_details.missing_fields.join(", ")}
+                     </p>
+                   </div>
+                 )}
+
+                 {report.validation_details?.invalid_fields?.length > 0 && (
+                   <div style={{ marginTop: '12px' }}>
+                     <p style={{ color: 'var(--danger-red)' }}><strong>Invalid Fields & Suggestions:</strong></p>
+                     {report.validation_details.invalid_fields.map((err, i) => (
+                       <div key={i} style={{ marginBottom: '8px', borderLeft: '2px solid var(--danger-red)', paddingLeft: '8px' }}>
+                          <div style={{ fontWeight: 600 }}>{err.field}</div>
+                          <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{err.issue}</div>
+                          {err.suggestion && <div style={{ color: 'var(--accent-cyan)', fontSize: '0.8rem', fontStyle: 'italic' }}>Tip: {err.suggestion}</div>}
+                       </div>
+                     ))}
+                   </div>
+                 )}
+
+                 {report.validation_details?.recovery_notes?.length > 0 && (
+                   <div style={{ marginTop: '12px' }}>
+                     <p style={{ color: 'var(--success-green)' }}><strong>Autonomous Recovery Logs:</strong></p>
+                     <ul style={{ paddingLeft: '20px', marginTop: '4px', fontSize: '0.8rem' }}>
+                        {report.validation_details.recovery_notes.map((note, i) => <li key={i}>{note}</li>)}
+                     </ul>
+                   </div>
+                 )}
               </div>
             </div>
           </div>

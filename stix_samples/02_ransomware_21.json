@@ -1,26 +1,27 @@
 {
   "type": "bundle",
   "id": "bundle--00000001-0000-0000-0000-000000000002",
+  "spec_version": "2.1",
   "objects": [
     {
       "type": "malware",
       "id": "malware--763c32e9-4674-4b5c-897d-65b82269a840",
+      "spec_version": "2.1",
       "created": "2026-04-09T10:00:00.000Z",
       "modified": "2026-04-09T10:00:00.000Z",
-      "name": "Conti Ransomware",
-      "description": "High-impact ransomware-as-a-service.",
+      "name": "LockBit 3.0",
       "malware_types": ["ransomware"],
       "is_family": true
     },
     {
-      "type": "indicator",
-      "id": "indicator--e2d09614-257a-43f6-932f-5b12da615598",
+      "type": "grouping",
+      "id": "grouping--e2d09614-257a-43f6-932f-5b12da615598",
+      "spec_version": "2.1",
       "created": "2026-04-09T10:00:00.000Z",
       "modified": "2026-04-09T10:00:00.000Z",
-      "name": "Conti C2 Server",
-      "pattern": "[domain-name:value = 'conti-update-server.com']",
-      "pattern_type": "stix",
-      "valid_from": "2026-04-09T10:00:00Z"
+      "name": "Summer 2026 Campaign",
+      "context": "Healthcare targets in EU",
+      "object_refs": ["malware--763c32e9-4674-4b5c-897d-65b82269a840"]
     }
   ]
 }
