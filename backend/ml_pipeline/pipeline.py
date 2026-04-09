@@ -59,18 +59,21 @@ def extract_features(data: dict) -> list:
     ]
 
 def predict_threat_level(features: list, data: dict, seed: int) -> str:
-    """ Prediction using the loaded joblib model """
+    """ Prediction using the loaded joblib model with safety overrides """
     if clf:
+        # Features: [num_objects, has_actor, has_ind, has_mal, has_vuln, desc_len]
+        has_flags = any(features[1:5])
+        
         X = np.array([features])
         y_pred = int(clf.predict(X)[0])
         levels = ["Low", "Medium", "High", "Critical"]
+        
+        # Guard: If NO malicious flags are present, cap at Medium unless model is VERY sure.
+        # This prevents "random noise" from being flagged as High/Critical.
+        if not has_flags and y_pred > 1:
+            return "Low"
+            
         return levels[y_pred]
-    else:
-        # Fallback to deterministic logic if model is missing
-        content = json.dumps(data).lower()
-        if any(k in content for k in ["critical", "zero-day", "log4shell"]): return "Critical"
-        if any(k in content for k in ["ransomware", "malware"]): return "High"
-        return "Low"
 
 def run_anomaly_detector(features: list) -> bool:
     return False

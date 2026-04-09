@@ -50,13 +50,27 @@ def train():
                 bundle = json.load(f)
                 features = extract_features(bundle)
                 
-                # Create synthetic variations to have more data
-                for i in range(10): # 10 variations per sample
+                # Create variations
+                for i in range(20): # Increased to 20 variations
                     f_var = features.copy()
                     f_var['num_objects'] += np.random.randint(-1, 2)
-                    f_var['description_len'] += np.random.randint(-50, 51)
+                    f_var['description_len'] += np.random.randint(-100, 101)
                     data.append(list(f_var.values()))
                     labels.append(label)
+
+    # 2. Add SYNTHETIC NEUTRAL DATA (Crucial!)
+    # This teaches the model that "one random object with no flags" = LOW
+    for i in range(50):
+        low_feature = [
+            np.random.randint(1, 3), # num_objects
+            0, # has_threat_actor
+            0, # has_indicator
+            0, # has_malware
+            0, # has_vulnerability
+            np.random.randint(10, 500) # description_len
+        ]
+        data.append(low_feature)
+        labels.append(0) # Always LOW
 
     X = np.array(data)
     y = np.array(labels)
