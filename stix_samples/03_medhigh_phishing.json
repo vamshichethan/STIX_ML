@@ -1,0 +1,13 @@
+{
+  "type": "bundle",
+  "id": "bundle--00000001-0000-0000-0000-000000000003",
+  "objects": [
+    {
+      "type": "campaign",
+      "id": "campaign--6e3c32e9-4674-4b5c-897d-65b82269a840",
+      "created": "2026-04-09T10:00:00.000Z",
+      "name": "2026 Tax Season Phishing",
+      "description": "Medium-High threat targeting corporate finance departments."
+    }
+  ]
+}

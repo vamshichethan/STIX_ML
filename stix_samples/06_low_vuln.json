@@ -1,0 +1,12 @@
+{
+  "type": "bundle",
+  "id": "bundle--00000001-0000-0000-0000-000000000006",
+  "objects": [
+    {
+      "type": "vulnerability",
+      "id": "vulnerability--223c32e9-4674-4b5c-897d-65b82269a840",
+      "name": "Reflected XSS in Admin Portal",
+      "description": "Low severity vulnerability with user interaction required."
+    }
+  ]
+}

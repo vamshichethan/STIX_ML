@@ -1,0 +1,14 @@
+{
+  "type": "bundle",
+  "id": "bundle--00000001-0000-0000-0000-000000000008",
+  "objects": [
+    {
+      "type": "indicator",
+      "id": "indicator--993c32e9-4674-4b5c-897d-65b82269a840",
+      "name": "Benign Crawler Activity",
+      "description": "Low threat web crawler scanning public assets.",
+      "pattern": "[ipv4-addr:value = '192.168.1.100']",
+      "pattern_type": "stix"
+    }
+  ]
+}

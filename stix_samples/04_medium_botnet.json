@@ -1,0 +1,13 @@
+{
+  "type": "bundle",
+  "id": "bundle--00000001-0000-0000-0000-000000000004",
+  "objects": [
+    {
+      "type": "malware",
+      "id": "malware--113c32e9-4674-4b5c-897d-65b82269a840",
+      "name": "Mirai Botnet Variant",
+      "description": "Medium threat IoT botnet.",
+      "malware_types": ["botnet"]
+    }
+  ]
+}

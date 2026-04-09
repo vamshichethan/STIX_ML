@@ -1,0 +1,14 @@
+{
+  "type": "bundle",
+  "id": "bundle--00000001-0000-0000-0000-000000000007",
+  "objects": [
+    {
+      "type": "report",
+      "id": "report--883c32e9-4674-4b5c-897d-65b82269a840",
+      "name": "Monthly Patch Advisory",
+      "description": "Informational report on routine updates.",
+      "published": "2026-04-09T10:00:00.000Z",
+      "object_refs": []
+    }
+  ]
+}
